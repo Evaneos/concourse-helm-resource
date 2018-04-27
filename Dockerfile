@@ -3,9 +3,14 @@ LABEL maintainer "mario.siegenthaler@linkyard.ch"
 
 RUN apk add --update --upgrade --no-cache jq bash nodejs curl yarn
 
-ENV KUBERNETES_VERSION 1.9.6
+ENV KUBERNETES_VERSION 1.10.1
 RUN curl -L -o /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl; \
     chmod +x /usr/local/bin/kubectl
+
+RUN apk add --no-cache python
+RUN curl -sSL https://sdk.cloud.google.com | bash
+RUN /root/google-cloud-sdk/install.sh --quiet --rc-path /root/.bashrc
+RUN ln -s /root/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud
 
 RUN yarn global add typescript
 
