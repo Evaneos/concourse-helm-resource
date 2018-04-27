@@ -86,6 +86,35 @@ setup_kubernetes() {
   exe kubectl cluster-info 2>/dev/null ||:
 }
 
+setup_gcloud() {
+  local payload=$1
+
+  local GCLOUDSERVICEACCOUNT=$(mktemp $TMPDIR/gcloud-service-account.json.XXXXXX)
+
+  # Optional. The content of a Google Cloud service account JSON
+  local gcloud_service_account="$(jq -r '.source.gcloud_service_account // ""' < $payload)"
+
+  # Optional. The path of a Google Cloud service account JSON
+  local gcloud_service_account_file="$(jq -r '.params.gcloud_service_account_file // ""' < $payload)"
+
+  if [[ -n "$gcloud_service_account_file"  ]]; then
+    if [[ ! -f "$gcloud_service_account_file" ]]; then
+      echoerr "gcloud service account file '$gcloud_service_account_file' does not exist"
+      exit 1
+    fi
+
+    cat "$gcloud_service_account_file" > ${GCLOUDSERVICEACCOUNT}
+  elif [[ -n "$gcloud_service_account" ]]; then
+    echo "$gcloud_service_account" > ${GCLOUDSERVICEACCOUNT}
+  else
+    echo "No gcloud service account info found..."
+    return 0
+  fi
+
+  echo "Activating gcloud service account..."
+  exe gcloud auth activate-service-account --key-file=${GCLOUDSERVICEACCOUNT}
+}
+
 setup_tls() {
   tls_enabled=$(jq -r '.source.tls_enabled // "false"' < $payload)
   tillerless=$(jq -r '.source.tillerless // "false"' < $payload)
@@ -273,6 +302,7 @@ setup_resource() {
     set -x
   fi
 
+  setup_gcloud $1
   echo "Initializing kubectl..."
   setup_kubernetes $1 $2
   echo "Initializing helm..."

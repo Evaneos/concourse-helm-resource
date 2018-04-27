@@ -7,6 +7,11 @@ ENV KUBERNETES_VERSION 1.14.3
 RUN curl -L -o /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl; \
   chmod +x /usr/local/bin/kubectl
 
+RUN apk add --no-cache python
+RUN curl -sSL https://sdk.cloud.google.com | bash
+RUN /root/google-cloud-sdk/install.sh --quiet --rc-path /root/.bashrc
+RUN ln -s /root/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud
+
 ADD assets /opt/resource
 RUN chmod +x /opt/resource/*
 
