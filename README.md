@@ -11,7 +11,7 @@ resource_types:
 - name: helm
   type: docker-image
   source:
-    repository: linkyard/concourse-helm-resource
+    repository: evaneos/concourse-helm-resource
 ```
 
 ## Source Configuration
